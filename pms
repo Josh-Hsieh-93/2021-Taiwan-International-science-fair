@@ -39,62 +39,8 @@ static unsigned int pm_at_100=0;
  * choose the correct wifi SSID and PSW
  */
 
-//#define SSID  "MD402"
-//#define PASS  "GICEiot402"
-
-//#define SSID  "mymy1G"
-//#define PASS  "0109092799"
-
-//#define SSID  "lab708g"
-//#define PASS  "guest1111"
-
-//#define SSID  "JDH#00"
-//#define PASS  "josh1050239"
-
-//#define SSID  "JDH#00_extend"
-//#define PASS  "josh1050239"
-
-//#define SSID  "JDH#01"
-//#define PASS  "josh1050239"
-
-//#define SSID  "JDH#02"
-//#define PASS  "josh1050239"
-
-//#define SSID  "JDH#03"
-//#define PASS  "josh1050239"
-
-//#define SSID  "JDH#04"
-//#define PASS  "josh1050239"
-
-//#define SSID  "JDH#05"
-//#define PASS  "josh1050239"
-
-//#define SSID  "Redmi"
-//#define PASS  "11111111"
-
-//#define SSID  "KINDY-2F"
-//#define PASS  "aaaaaaaaaaaaa"
-
-//#define SSID  "43Y271662"
-//#define PASS  "22621812"
-
-//3B
-//#define SSID  "Yu_Min_little_gg"
-//#define PASS  "0926130175"
-
-//3C
-//#define SSID  "Lab701"
-//#define PASS  "lab701lab701"
-
-//3D
-//#define SSID  "Lab701_extend"
-//#define PASS  "lab701lab701"
-
-//2A
-#define SSID  "TOP"
-#define PASS  "22600922"
-
-
+#define SSID  "     "
+#define PASS  "     "
 
 
 //ThinkSpeak Setup//
@@ -103,54 +49,12 @@ static unsigned int pm_at_100=0;
 /*
  * choose the correct API key of each channel
  * 
- * THIS IS 02D SENSOR
+ * 
  */
 
+String sApiKey1="                "; 
 
-//MF
-//String sApiKey1="RBH0MUEE2NYES01L"; 
-//5F
-//String sApiKey1="36ZOMPU605LC0O4U";
-//8F
-//String sApiKey1="FNT7IJ5GWV25W3BI";
-//12F
-//String sApiKey1="IVXYREK0B0J43FHA";
 
-//jdh_pms01 A
-//String sApiKey1="KJM2NV7HVOPGFPBW";
-//jdh_pms01 B
-//String sApiKey1="NJVYPJ60E09AZFOY";
-//jdh_pms01 C
-//String sApiKey1="UV5CVJF3QVRTDYSY";
-//jdh_pms01 D
-//String sApiKey1="V07K0O09FS33CHBT";
-
-//jdh_pms02 A
-String sApiKey1="F9I51FXPEOJSNQPE";
-//jdh_pms02 B
-//String sApiKey1="KTJEYY89X739RCML";
-//jdh_pms02 C
-//String sApiKey1="SYSQ7NHLIRU8TRE3";
-//jdh_pms02 D
-//String sApiKey1="2D41N75O4OLO1M10";
-
-//jdh_pms03 A
-//String sApiKey1="3LM36XHZ36PP8SQH";
-//jdh_pms03 B
-//String sApiKey1="8QH0PBVJM7IGP5PO";
-//jdh_pms03 C
-//String sApiKey1="815ZM053MWSF7GX8";
-//jdh_pms03 D
-//String sApiKey1="ZLJWNWF5OOB96OJS";
-
-//jdh_pms04 A
-//String sApiKey1="4OZMW2N0A4TP5K3Y";
-//jdh_pms04 B
-//String sApiKey1="6YPAS3DYLQ5HUP44";
-//jdh_pms04 C
-//String sApiKey1="G8I49HEABY5P0BS4";
-//jdh_pms04 D
-//String sApiKey1="SQPO5QDHTD9X11GB";
 
 void fnSendDebug(String lsCmd)
 {
