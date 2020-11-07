@@ -1,0 +1,457 @@
+#include <SoftwareSerial.h>
+
+// DHT
+#include <DHT.h>
+
+//for saving memory
+//#define dhtPin 7      //讀取DHT11 Data
+//#define dhtType DHT11 //選用DHT11  
+//DHT dht(dhtPin, dhtType); // Initialize DHT sensor
+
+DHT dht(7, DHT11); // Initialize DHT sensor
+
+  
+SoftwareSerial PmsSerial(2, 3); // RX, TX
+SoftwareSerial WifiSerial(4, 5); // RX, TX
+ 
+static unsigned int pm_cf_10=0;           //定義全域變數
+static unsigned int pm_cf_25=0;
+static unsigned int pm_cf_100=0;
+static unsigned int pm_at_10=0;
+static unsigned int pm_at_25=0;
+static unsigned int pm_at_100=0;
+
+
+
+//constant Setup//
+//for saving memory; setup in loop
+//unsigned long nWaitingTime = 32767;  //每300秒測一次
+//unsigned long nWaitingTime = 300000;  //每300秒測一次
+
+//Other Setup//
+//int nFirstTime=1 ;
+
+//int i ;
+//int nResult;
+
+
+/*
+ * choose the correct wifi SSID and PSW
+ */
+
+//#define SSID  "MD402"
+//#define PASS  "GICEiot402"
+
+//#define SSID  "mymy1G"
+//#define PASS  "0109092799"
+
+//#define SSID  "lab708g"
+//#define PASS  "guest1111"
+
+//#define SSID  "JDH#00"
+//#define PASS  "josh1050239"
+
+//#define SSID  "JDH#00_extend"
+//#define PASS  "josh1050239"
+
+//#define SSID  "JDH#01"
+//#define PASS  "josh1050239"
+
+//#define SSID  "JDH#02"
+//#define PASS  "josh1050239"
+
+//#define SSID  "JDH#03"
+//#define PASS  "josh1050239"
+
+//#define SSID  "JDH#04"
+//#define PASS  "josh1050239"
+
+//#define SSID  "JDH#05"
+//#define PASS  "josh1050239"
+
+//#define SSID  "Redmi"
+//#define PASS  "11111111"
+
+//#define SSID  "KINDY-2F"
+//#define PASS  "aaaaaaaaaaaaa"
+
+//#define SSID  "43Y271662"
+//#define PASS  "22621812"
+
+//3B
+//#define SSID  "Yu_Min_little_gg"
+//#define PASS  "0926130175"
+
+//3C
+//#define SSID  "Lab701"
+//#define PASS  "lab701lab701"
+
+//3D
+//#define SSID  "Lab701_extend"
+//#define PASS  "lab701lab701"
+
+//2A
+#define SSID  "TOP"
+#define PASS  "22600922"
+
+
+
+
+//ThinkSpeak Setup//
+#define IP "184.106.153.149" // thingspeak.com
+
+/*
+ * choose the correct API key of each channel
+ * 
+ * THIS IS 02D SENSOR
+ */
+
+
+//MF
+//String sApiKey1="RBH0MUEE2NYES01L"; 
+//5F
+//String sApiKey1="36ZOMPU605LC0O4U";
+//8F
+//String sApiKey1="FNT7IJ5GWV25W3BI";
+//12F
+//String sApiKey1="IVXYREK0B0J43FHA";
+
+//jdh_pms01 A
+//String sApiKey1="KJM2NV7HVOPGFPBW";
+//jdh_pms01 B
+//String sApiKey1="NJVYPJ60E09AZFOY";
+//jdh_pms01 C
+//String sApiKey1="UV5CVJF3QVRTDYSY";
+//jdh_pms01 D
+//String sApiKey1="V07K0O09FS33CHBT";
+
+//jdh_pms02 A
+String sApiKey1="F9I51FXPEOJSNQPE";
+//jdh_pms02 B
+//String sApiKey1="KTJEYY89X739RCML";
+//jdh_pms02 C
+//String sApiKey1="SYSQ7NHLIRU8TRE3";
+//jdh_pms02 D
+//String sApiKey1="2D41N75O4OLO1M10";
+
+//jdh_pms03 A
+//String sApiKey1="3LM36XHZ36PP8SQH";
+//jdh_pms03 B
+//String sApiKey1="8QH0PBVJM7IGP5PO";
+//jdh_pms03 C
+//String sApiKey1="815ZM053MWSF7GX8";
+//jdh_pms03 D
+//String sApiKey1="ZLJWNWF5OOB96OJS";
+
+//jdh_pms04 A
+//String sApiKey1="4OZMW2N0A4TP5K3Y";
+//jdh_pms04 B
+//String sApiKey1="6YPAS3DYLQ5HUP44";
+//jdh_pms04 C
+//String sApiKey1="G8I49HEABY5P0BS4";
+//jdh_pms04 D
+//String sApiKey1="SQPO5QDHTD9X11GB";
+
+void fnSendDebug(String lsCmd)
+{
+    
+    Serial.print("SEND: ");
+    Serial.println(lsCmd);
+
+    WifiSerial.println(lsCmd);
+} 
+
+void fnConnectingWifi(String lsState){
+    int lnTimeOut;
+    for (lnTimeOut=0 ; lnTimeOut<10 ; lnTimeOut++)
+    {
+      if(WifiSerial.find("OK"))
+      {
+          WifiSerial.println("RECEIVED: OK");
+          break;
+      }
+      else if(lnTimeOut==9){
+       Serial.print( lsState );
+       Serial.println(" fail...\nExit2");
+      }
+      else
+      {
+        delay(500);
+      }
+    }
+}
+
+ void fnWifiConnection()
+{
+    String lsCmd="AT+CWJAP=\"";
+    lsCmd+=SSID;
+    lsCmd+="\",\"";
+    lsCmd+=PASS;
+    lsCmd+="\"";
+    fnSendDebug(lsCmd);
+    fnConnectingWifi("Wifi_connecting");
+}
+
+boolean fnSetWifi()
+{
+    WifiSerial.println("AT+CWMODE=1");
+    fnWifiConnection();
+}
+
+void fnIniWifi()
+{
+   fnSendDebug("AT");
+   fnConnectingWifi("sent AT");
+   Serial.println("going to initialize wifi");
+   fnSetWifi();
+}
+
+//int fnSentOnCloud(String lsApiKey, String lsF1, String lsF2, String lsF3, String lsF4, String lsF5, String lsF6)
+//int fnSentOnCloud(String lsApiKey, String lsF1, String lsF2, String lsF3, String lsF4, String lsF5, String lsF6, String lsF7)
+int fnSentOnCloud(String lsApiKey, String lsF1, String lsF2, String lsF3, String lsF4, String lsF5, String lsF6, String lsF7, String lsF8)
+{
+  String lsGET = "GET /update?key=";
+  
+    // 設定 ESP8266 作為 Client 端
+    String lsCmd = "AT+CIPSTART=\"TCP\",\"";
+    lsCmd += IP;
+    lsCmd += "\",80";
+    fnSendDebug(lsCmd);
+    if( WifiSerial.find( "Error" ) )
+    {
+        Serial.print( "RECEIVED: Error\nExit1" );
+        return;
+    }
+
+    lsGET= lsGET + lsApiKey;
+
+    //lsCmd = lsGET + "&field1=" + lsF1 + "&field2=" + lsF2 + "&field3=" + lsF3 + "&field4=" + lsF4 + "&field5=" + lsF5 + "&field6=" + lsF6 +"\r\n";
+    lsCmd = lsGET + "&field1=" + lsF1 + "&field2=" + lsF2 + "&field3=" + lsF3 + "&field4=" + lsF4 + "&field5=" + lsF5 + "&field6=" + lsF6 + "&field7=" + lsF7 + "&field8=" + lsF8 +"\r\n";
+    //lsCmd = lsGET + "&field1=100&field2=102&field3=120&field4=120&field5=180&field6=120&field7=10&field8=99\r\n";
+    
+    WifiSerial.print( "AT+CIPSEND=" );
+    
+    //Serial.print("lsCmd: "+lsCmd);
+    Serial.println(lsCmd.length());
+    
+    WifiSerial.println( lsCmd.length() );
+    if(WifiSerial.find( ">" ) )
+    {
+        Serial.print(">");
+        Serial.print(lsCmd);
+        WifiSerial.print(lsCmd);
+    }
+    else
+    {
+        WifiSerial.print( "AT+CIPCLOSE" );
+    }
+    if( WifiSerial.find("OK") )
+    {
+        Serial.println( "RECEIVED: OK" );
+        return 1;
+    }
+    else
+    {
+        Serial.println( "RECEIVED: Error\nExit2" );
+        return 0;
+    }
+}
+
+
+ 
+void getG5(unsigned char ucData)//獲取G5的值
+{
+  static unsigned int ucRxBuffer[250];
+  static unsigned int ucRxCnt = 0;
+  ucRxBuffer[ucRxCnt++] = ucData;
+  if (ucRxBuffer[0] != 0x42 && ucRxBuffer[1] != 0x4D)//資料頭判斷
+  {
+    ucRxCnt = 0;
+    return;
+  }
+  
+  if (ucRxCnt > 16)//資料位元數判斷//G5T為16
+  {
+       pm_cf_10=(int)ucRxBuffer[4] * 256 + (int)ucRxBuffer[5];      //大氣環境下PM2.5濃度計算        
+       pm_cf_25=(int)ucRxBuffer[6] * 256 + (int)ucRxBuffer[7];
+       pm_cf_100=(int)ucRxBuffer[8] * 256 + (int)ucRxBuffer[9];
+       pm_at_10=(int)ucRxBuffer[10] * 256 + (int)ucRxBuffer[11];               
+       pm_at_25=(int)ucRxBuffer[12] * 256 + (int)ucRxBuffer[13];
+       pm_at_100=(int)ucRxBuffer[14] * 256 + (int)ucRxBuffer[15];
+
+            
+    if (pm_cf_25 >  999 || pm_cf_10 > 999 || pm_cf_100 >999)//如果PM2.5數值>1000，返回重新計算
+    {
+      ucRxCnt = 0;
+      return;
+    }
+     
+    ucRxCnt = 0;
+    return;
+  }
+ 
+}
+ 
+void setup() {
+   // DHT
+   dht.begin();//啟動DHT
+  
+   PmsSerial.begin(9600);
+   PmsSerial.setTimeout(1500);
+   WifiSerial.begin(115200);
+   //WifiSerial.begin(9600);
+   //WifiSerial.setTimeout(1500);
+   Serial.begin(115200);
+
+   
+   //Serial.print("PM_CF1.0");Serial.print(",");
+   //Serial.print("PM_CF2.5");Serial.print(",");
+   //Serial.print("PM_CF10");Serial.print(",");
+   //Serial.print("PM_AQI1.0");Serial.print(",");
+   //Serial.print("PM_AQI2.5");Serial.print(",");
+   //Serial.print("PM_AQI10");Serial.print(",");
+   //Serial.print("(ug/m3)");Serial.print(",");
+   //Serial.print("(ug/m3)");Serial.print(",");
+   //Serial.print("(ug/m3)");Serial.print(",");
+   //Serial.print("(ug/m3)");Serial.print(",");
+   //Serial.print("(ug/m3)");Serial.print(",");
+   //Serial.println("(ug/m3)");
+   
+
+   // test the connection to wifi AP
+   WifiSerial.listen();
+   /*
+   if (WifiSerial.isListening())
+   {
+     Serial.println("WifiSerial.isListening");
+   }else
+   {
+     Serial.println("WifiSerial.is not Listening");
+   }
+   */
+    fnIniWifi();
+   
+}
+
+int nFirstTime=1 ;
+
+void loop() 
+{
+  //Other Setup//
+
+  int i ;
+  int nResult;
+ 
+  ///*
+  if (nFirstTime==1)
+  {
+    delay(100);   // 0.1 second
+    nFirstTime=0;
+  }else
+  {
+    //delay(5000);
+    //delay(nWaitingTime);
+    //delay(32767);
+    delay(300000);
+  }
+    
+  ///*
+  PmsSerial.listen();
+  /*
+  if (PmsSerial.isListening())
+  {
+    Serial.println("PmsSerial.isListening");
+  }else
+  {
+    Serial.println("PmsSerial.is not Listening");
+  }
+  */
+
+  while (PmsSerial.available()) {
+    getG5(PmsSerial.read());
+  }
+
+  // this part is for retrieving useful values
+  if (pm_cf_10 ==0 && pm_cf_25 ==0 && pm_cf_100 ==0)
+  {
+    Serial.println("All are 0s");
+    // new added; restart
+    nFirstTime=1;
+    delay(1000);   // avoid to read too many times
+    return;
+  }
+  
+  //Serial.print(pm_cf_10);Serial.print(",");
+  //Serial.print(pm_cf_25);Serial.print(",");
+  Serial.println(pm_cf_10);
+
+//  Serial.print(pm_at_10);Serial.print(",");
+//  Serial.print(pm_at_25);Serial.print(",");
+//  Serial.println(pm_at_100);
+
+  //*/
+
+ 
+  delay(3000);
+
+ ///*
+
+  //DHT part
+//  float h = dht.readHumidity();//讀取濕度
+//  float t = dht.readTemperature();//讀取攝氏溫度
+//  if (isnan(h) || isnan(t)) {
+//    Serial.println("無法從DHT傳感器讀取！");
+//    return;
+//  }
+
+  
+
+
+
+  
+  WifiSerial.listen();
+  if (WifiSerial.isListening())
+  {
+    Serial.println("WifiSerial.isListening");
+  }else
+  {
+    Serial.println("WifiSerial.is not Listening");
+  }
+  delay(500);
+
+
+  // try to connect wifi 10 times if errors happen
+  for(i=0; i<5; i++)
+  {
+    //nResult=fnSentOnCloud(sApiKey1, String(pm_cf_10), String(pm_cf_25),String(pm_cf_100),String(pm_at_10),String(pm_at_25),String(pm_at_100));
+    //nResult=fnSentOnCloud(sApiKey1, String(pm_cf_10), String(pm_cf_25),String(pm_cf_100),String(pm_at_10),String(pm_at_25),String(pm_at_100),String(dht.readHumidity()),String(dht.readTemperature()));
+    nResult=fnSentOnCloud(sApiKey1, String(pm_cf_10), String(pm_cf_25),String(pm_cf_100),String(pm_at_10),String(pm_at_25),String(pm_at_100),String(int(dht.readHumidity())),String(dht.readTemperature()));
+    //nResult=fnSentOnCloud(sApiKey1, String(1), String(2),String(3),String(4),String(5),String(6),String(7),String(8));
+    
+    Serial.print("nResult: ");Serial.println(nResult);
+    // check if sent
+    if(nResult ==1)
+    {
+      // if sent successufully, then do new job
+      break;
+    }
+
+    // if get errors too many times, redo initialize wifi 
+    if (i==2)
+    {
+      fnIniWifi();
+      nFirstTime=1;
+      break;    
+    }
+    delay(3000);  
+  }
+   
+  delay(2000);
+  pm_cf_10=0;        
+  pm_cf_25=0;
+  pm_cf_100=0;
+  pm_at_10=0;               
+  pm_at_25=0;
+  pm_at_100=0;
+
+}
